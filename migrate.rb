@@ -8,9 +8,9 @@ require 'active_support/inflector'
 require 'zlib'
 
 # additional fk fields that need to be offset
-INCLUDE_FKS = ["behavior_id"]
+INCLUDE_FKS = ["behavior_id", "blob_id"]
 
-# additional fk fields that need to be left alone
+# additional fk fields that need to be left alone.  This is only necessary if they match a model
 EXCLUDE_FKS = ["context_id", "parent_context_id", "deployment_id", "line_item_id", "client_id"]
 
 ARGV.length == 2 or raise "usage: migrate infile[.gz] outfile[.gz]"
@@ -145,7 +145,7 @@ process_copies(input, output) do |schema, table, *cols|
       ref = ActiveSupport::Inflector.pluralize(ref)
       if EXCLUDE_FKS.include?(col)
         nil
-      elsif tenanted_tables.include? ref || INCLUDE_FKS.include?(col)
+      elsif tenanted_tables.include?(ref) || INCLUDE_FKS.include?(col)
         ->(x) { x == "\\N" ? "\\N" : Integer(x) + offset }
       elsif global_tables.include? ref
         nil
