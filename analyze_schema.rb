@@ -57,7 +57,7 @@ EOF
     raise "invalid: #{line}" if !m
 
     puts <<EOF
-    remove_index :#{table}, name: :#{m[:name]}
+    remove_index :#{table}, column: #{m[:cols]}, name: :#{m[:name]}, unique: true#{m[:rest]}
     add_index :#{table}, #{m[:cols]}, name: :#{m[:name]}, unique: true#{m[:rest]}
 EOF
   end
