@@ -58,7 +58,7 @@ def process_copies(input, output = nil)
       end
 
       if transform
-        data = line.split("\t")
+        data = line.split("\t", -1)
         raise "#{line_no}: data format error\n#{line}" if data.length < 1
 
         newdata = transform.call(*data)
