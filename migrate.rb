@@ -7,6 +7,9 @@
 require 'active_support/inflector'
 require 'zlib'
 
+# additional fields that need to be offset
+ADDITIONAL_FKS = ["behavior_id"]
+
 ARGV.length == 2 or raise "usage: migrate infile[.gz] outfile[.gz]"
 
 input = File.open(ARGV[0], "rb")
@@ -139,8 +142,8 @@ process_copies(input, output) do |schema, table, *cols|
       ref = ActiveSupport::Inflector.pluralize(ref)
       if global_tables.include? ref
         nil
-      elsif tenanted_tables.include? ref
-        ->(x) { x.to_i + offset }
+      elsif tenanted_tables.include? ref || ADDITIONAL_FKS.include?(col)
+        ->(x) { x == "\N" ? "\N" : x.to_i + offset }
       else
         warns << "Unknown ref #{table}.#{col}"
         nil

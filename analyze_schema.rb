@@ -53,12 +53,12 @@ schema.split("\n").grep(/create_table|t\.index .* unique: true/) do |line|
 EOF
     end
   elsif !global_tables.include?(table) && !table.match?(/^que_/)
-    m = line.match(/t\.index (?<cols>\[.*\]), name: "(?<name>[^"]*)", unique: true(?<rest>.*)$/)
+    m = line.match(/t\.index \[(?<cols>.*)\], name: "(?<name>[^"]*)", unique: true(?<rest>.*)$/)
     raise "invalid: #{line}" if !m
 
     puts <<EOF
-    remove_index :#{table}, column: #{m[:cols]}, name: :#{m[:name]}, unique: true#{m[:rest]}
-    add_index :#{table}, #{m[:cols]}, name: :#{m[:name]}, unique: true#{m[:rest]}
+    remove_index :#{table}, column: [#{m[:cols]}], name: :#{m[:name]}, unique: true#{m[:rest]}
+    add_index :#{table}, ["tenant_id", #{m[:cols]}], name: :#{m[:name]}, unique: true#{m[:rest]}
 EOF
   end
 end
