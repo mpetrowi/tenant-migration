@@ -7,8 +7,11 @@
 require 'active_support/inflector'
 require 'zlib'
 
-# additional fields that need to be offset
-ADDITIONAL_FKS = ["behavior_id"]
+# additional fk fields that need to be offset
+INCLUDE_FKS = ["behavior_id"]
+
+# additional fk fields that need to be left alone
+EXCLUDE_FKS = ["context_id", "parent_context_id"]
 
 ARGV.length == 2 or raise "usage: migrate infile[.gz] outfile[.gz]"
 
@@ -140,10 +143,12 @@ process_copies(input, output) do |schema, table, *cols|
     elsif col.end_with?("_id")
       ref = col.delete_suffix("_id")
       ref = ActiveSupport::Inflector.pluralize(ref)
-      if global_tables.include? ref
+      if EXCLUDE_FKS.include?(col)
         nil
-      elsif tenanted_tables.include? ref || ADDITIONAL_FKS.include?(col)
+      elsif tenanted_tables.include? ref || INCLUDE_FKS.include?(col)
         ->(x) { x == "\\N" ? "\\N" : x.to_i + offset }
+      elsif global_tables.include? ref
+        nil
       else
         warns << "Unknown ref #{table}.#{col}"
         nil
