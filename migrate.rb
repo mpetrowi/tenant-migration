@@ -11,7 +11,7 @@ require 'zlib'
 INCLUDE_FKS = ["behavior_id"]
 
 # additional fk fields that need to be left alone
-EXCLUDE_FKS = ["context_id", "parent_context_id"]
+EXCLUDE_FKS = ["context_id", "parent_context_id", "deployment_id", "line_item_id", "client_id"]
 
 ARGV.length == 2 or raise "usage: migrate infile[.gz] outfile[.gz]"
 
@@ -135,7 +135,7 @@ process_copies(input, output) do |schema, table, *cols|
         if tenant == "public"
           ->(_x) { raise "Unexpected public data" }
         else
-          ->(x) { x.to_i + offset }
+          ->(x) { Integer(x) + offset }
         end
       end
     elsif col == "tenant_id" && tenant
@@ -146,7 +146,7 @@ process_copies(input, output) do |schema, table, *cols|
       if EXCLUDE_FKS.include?(col)
         nil
       elsif tenanted_tables.include? ref || INCLUDE_FKS.include?(col)
-        ->(x) { x == "\\N" ? "\\N" : x.to_i + offset }
+        ->(x) { x == "\\N" ? "\\N" : Integer(x) + offset }
       elsif global_tables.include? ref
         nil
       else
