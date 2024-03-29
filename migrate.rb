@@ -143,7 +143,7 @@ process_copies(input, output) do |schema, table, *cols|
       if global_tables.include? ref
         nil
       elsif tenanted_tables.include? ref || ADDITIONAL_FKS.include?(col)
-        ->(x) { x == "\N" ? "\N" : x.to_i + offset }
+        ->(x) { x == "\\N" ? "\\N" : x.to_i + offset }
       else
         warns << "Unknown ref #{table}.#{col}"
         nil
